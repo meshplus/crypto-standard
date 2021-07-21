@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.1.1"></a>
+## [0.1.1](http://github.com/meshplus/crypto/compare/v0.1.0...v0.1.1) (2021-07-21)
+
+
+### Features
+
+* **32bit:** support 32bit ([ff3dec1](http://github.com/meshplus/crypto/commits/ff3dec1))
+
+
+
 <a name="0.1.0"></a>
 # 0.1.0 (2021-01-11)
 
