@@ -66,7 +66,7 @@ var (
 
 func init() {
 	// around 20 ms on a modern CPU.
-	context = C.secp256k1_context_create(3) // SECP256K1_START_SIGN | SECP256K1_START_VERIFY
+	context = C.dm_secp256k1_context_create(3) // SECP256K1_START_SIGN | SECP256K1_START_VERIFY
 }
 
 //CurveScalarMult Curve Scalar Mult
@@ -112,7 +112,7 @@ func BaseMul(scalar []byte) (*big.Int, *big.Int) {
 	point := make([]uint8, 64)
 	pointPtr := (*C.secp256k1_pubkey)(unsafe.Pointer(&point[0]))
 
-	C.secp256k1_ec_pubkey_create(context, pointPtr, scalarPtr)
+	C.dm_secp256k1_ec_pubkey_create(context, pointPtr, scalarPtr)
 	x := new(big.Int).SetBytes(point[:32])
 	y := new(big.Int).SetBytes(point[32:])
 	return x, y
@@ -145,13 +145,13 @@ func Sign(msg []byte, seckey []byte, rand io.Reader) ([]byte, error) {
 	}
 	ndataPtr := unsafe.Pointer(&nonce[0])
 
-	noncefpPtr := &(*C.secp256k1_nonce_function_default)
+	noncefpPtr := &(*C.dm_secp256k1_nonce_function_default)
 
-	if C.secp256k1_ec_seckey_verify(context, seckeyPtr) != C.int(1) {
+	if C.dm_secp256k1_ec_seckey_verify(context, seckeyPtr) != C.int(1) {
 		return nil, errors.New("Invalid secret key")
 	}
 
-	ret := C.secp256k1_ecdsa_sign_recoverable(
+	ret := C.dm_secp256k1_ecdsa_sign_recoverable(
 		context,
 		sigPtr,
 		msgPtr,
@@ -168,7 +168,7 @@ func Sign(msg []byte, seckey []byte, rand io.Reader) ([]byte, error) {
 	sigSerializedPtr := (*C.uchar)(unsafe.Pointer(&sigSerialized[0]))
 	var recid C.int
 
-	C.secp256k1_ecdsa_recoverable_signature_serialize_compact(
+	C.dm_secp256k1_ecdsa_recoverable_signature_serialize_compac(
 		context,
 		sigSerializedPtr, // 64 byte compact signature
 		&recid,
@@ -207,7 +207,7 @@ func RecoverPubkey(msg []byte, sig []byte) ([]byte, error) {
 	recoverableSigPtr := (*C.secp256k1_ecdsa_recoverable_signature)(unsafe.Pointer(&bytes65[0]))
 	recid := C.int(sig[64])
 
-	ret := C.secp256k1_ecdsa_recoverable_signature_parse_compact(
+	ret := C.dm_secp256k1_ecdsa_recoverable_signature_parse_compact(
 		context,
 		recoverableSigPtr,
 		sigPtr,
@@ -216,7 +216,7 @@ func RecoverPubkey(msg []byte, sig []byte) ([]byte, error) {
 		return nil, errors.New("failed to parse signature")
 	}
 
-	ret = C.secp256k1_ecdsa_recover(
+	ret = C.dm_secp256k1_ecdsa_recover(
 		context,
 		pubkeyPtr,
 		recoverableSigPtr,
@@ -228,7 +228,7 @@ func RecoverPubkey(msg []byte, sig []byte) ([]byte, error) {
 
 	serializedPubkeyPtr := (*C.uchar)(unsafe.Pointer(&bytes65[0]))
 	var outputLen C.size_t
-	C.secp256k1_ec_pubkey_serialize( // always returns 1
+	C.dm_secp256k1_ec_pubkey_serialize( // always returns 1
 		context,
 		serializedPubkeyPtr,
 		&outputLen,

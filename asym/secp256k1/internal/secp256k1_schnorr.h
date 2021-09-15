@@ -20,7 +20,7 @@ extern "C" {
  *  In:      msg32:  the 32-byte message hash being signed (cannot be NULL)
  *           seckey: pointer to a 32-byte secret key (cannot be NULL)
  *           noncefp:pointer to a nonce generation function. If NULL,
- *                   secp256k1_nonce_function_default is used
+ *                   dm_secp256k1_nonce_function_default is used
  *           ndata:  pointer to arbitrary data used by the nonce generation
  *                   function (can be NULL)
  */
@@ -80,7 +80,7 @@ SECP256K1_API int secp256k1_schnorr_recover(
  *                        be NULL)
  *           sec32:       the 32-byte private key (cannot be NULL)
  *           noncefp:     pointer to a nonce generation function. If NULL,
- *                        secp256k1_nonce_function_default is used
+ *                        dm_secp256k1_nonce_function_default is used
  *           noncedata:   pointer to arbitrary data used by the nonce generation
  *                        function (can be NULL)
  *
@@ -109,7 +109,7 @@ SECP256K1_API int secp256k1_schnorr_generate_nonce_pair(
  *  In:   msg32:           pointer to 32-byte message to sign
  *        sec32:           pointer to 32-byte private key
  *        pubnonce_others: pointer to pubkey containing the sum of the other's
- *                         nonces (see secp256k1_ec_pubkey_combine)
+ *                         nonces (see dm_secp256k1_ec_pubkey_combine)
  *        secnonce32:      pointer to 32-byte array containing our nonce
  *
  * The intended procedure for creating a multiparty signature is:
@@ -120,7 +120,7 @@ SECP256K1_API int secp256k1_schnorr_generate_nonce_pair(
  *   private nonce can lead to discovery of your private key, so it should be
  *   considered secret).
  * - All signers combine all the public nonces they received (excluding their
- *   own) using secp256k1_ec_pubkey_combine to obtain an
+ *   own) using dm_secp256k1_ec_pubkey_combine to obtain an
  *   Rall[i] = sum(R[0..i-1,i+1..n]).
  * - All signers produce a partial signature using
  *   secp256k1_schnorr_partial_sign, passing in their own private key x[i],
@@ -130,10 +130,10 @@ SECP256K1_API int secp256k1_schnorr_generate_nonce_pair(
  * - Someone combines all partial signatures using
  *   secp256k1_schnorr_partial_combine, to obtain a full signature.
  * - The resulting signature is validatable using secp256k1_schnorr_verify, with
- *   public key equal to the result of secp256k1_ec_pubkey_combine of the
+ *   public key equal to the result of dm_secp256k1_ec_pubkey_combine of the
  *   signers' public keys (sum(Q[0..n])).
  *
- *  Note that secp256k1_schnorr_partial_combine and secp256k1_ec_pubkey_combine
+ *  Note that secp256k1_schnorr_partial_combine and dm_secp256k1_ec_pubkey_combine
  *  function take their arguments in any order, and it is possible to
  *  pre-combine several inputs already with one call, and add more inputs later
  *  by calling the function again (they are commutative and associative).
