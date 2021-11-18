@@ -2,156 +2,9 @@ package ed25519
 
 import (
 	"bytes"
-	"crypto/rand"
 	"github.com/stretchr/testify/assert"
-	"strconv"
 	"testing"
 )
-
-func TestBatch64(t *testing.T) {
-	msgGroup, vkGroup, signGroup := make([][]byte, 64), make([][]byte, 64), make([][]byte, 64)
-	for i := 0; i < 64; i++ {
-		var err error
-		tmp, _ := GenerateKey(rand.Reader)
-		vkGroup[i], err = tmp.Bytes()
-		if err != nil {
-			panic("ed25519 init sign err:" + err.Error())
-		}
-		msgGroup[i] = []byte("hyperchainhyperchainhyperchainhyperchain" + strconv.Itoa(i))
-		tempKey := new(EDDSAPrivateKey)
-		tempKey.FromBytes(vkGroup[i], nil)
-		signGroup[i], err = tempKey.Sign(rand.Reader, msgGroup[i], nil)
-		if err != nil {
-			panic("ed25519 init sign err:" + err.Error())
-		}
-	}
-
-	pkGroup := make([][]byte, 64)
-	for i := range vkGroup {
-		pkGroup[i] = make([]byte, 32)
-		copy(pkGroup[i], vkGroup[i][32:])
-	}
-
-	b, err := new(EDDSAPublicKey).BatchVerify(pkGroup, signGroup, msgGroup)
-	if err != nil {
-		if b {
-			panic("return true with err:" + err.Error())
-		}
-		panic("verify batch fail," + err.Error())
-	}
-	if !b {
-		panic("return false without err")
-	}
-}
-
-func TestBatch1024(t *testing.T) {
-	batchNum := 1024
-	msgGroup, vkGroup, signGroup := make([][]byte, batchNum), make([][]byte, batchNum), make([][]byte, batchNum)
-	for i := 0; i < batchNum; i++ {
-		var err error
-		tmp, _ := GenerateKey(rand.Reader)
-		vkGroup[i], err = tmp.Bytes()
-		if err != nil {
-			panic("ed25519 init sign err:" + err.Error())
-		}
-		msgGroup[i] = []byte("hyperchainhyperchainhyperchainhyperchain" + strconv.Itoa(i))
-		tempKey := new(EDDSAPrivateKey)
-		tempKey.FromBytes(vkGroup[i], nil)
-		signGroup[i], err = tempKey.Sign(rand.Reader, msgGroup[i], nil)
-		if err != nil {
-			panic("ed25519 init sign err:" + err.Error())
-		}
-	}
-
-	pkGroup := make([][]byte, batchNum)
-	for i := range vkGroup {
-		pkGroup[i] = make([]byte, 32)
-		copy(pkGroup[i], vkGroup[i][32:])
-	}
-
-	b, err := new(EDDSAPublicKey).BatchVerify(pkGroup, signGroup, msgGroup)
-	if err != nil {
-		if b {
-			panic("return true with err:" + err.Error())
-		}
-		panic("verify batch fail," + err.Error())
-	}
-	if !b {
-		panic("return false without err")
-	}
-}
-
-func TestBatchSameMsg(t *testing.T) {
-	batchNum := 173
-	msg := make([]byte, 1024)
-	_, _ = rand.Read(msg)
-	vkGroup, signGroup := make([][]byte, batchNum), make([][]byte, batchNum)
-	for i := 0; i < batchNum; i++ {
-		var err error
-		tmp, _ := GenerateKey(rand.Reader)
-		vkGroup[i], err = tmp.Bytes()
-		if err != nil {
-			panic("ed25519 init sign err:" + err.Error())
-		}
-		tempKey := new(EDDSAPrivateKey)
-		tempKey.FromBytes(vkGroup[i], nil)
-		signGroup[i], err = tempKey.Sign(rand.Reader, msg, nil)
-		if err != nil {
-			panic("ed25519 init sign err:" + err.Error())
-		}
-	}
-
-	pkGroup := make([][]byte, batchNum)
-	for i := range vkGroup {
-		pkGroup[i] = make([]byte, 32)
-		copy(pkGroup[i], vkGroup[i][32:])
-	}
-
-	b, err := new(EDDSAPublicKey).BatchVerify(pkGroup, signGroup, [][]byte{msg})
-	if err != nil {
-		if b {
-			panic("return true with err:" + err.Error())
-		}
-		panic("verify batch fail," + err.Error())
-	}
-	if !b {
-		panic("return false without err")
-	}
-}
-
-func TestBatch64Fail(t *testing.T) {
-	msgGroup, vkGroup, signGroup := make([][]byte, 64), make([][]byte, 64), make([][]byte, 64)
-	for i := 0; i < 64; i++ {
-		var err error
-		tmp, _ := GenerateKey(rand.Reader)
-		vkGroup[i], err = tmp.Bytes()
-		msgGroup[i] = []byte("hyperchainhyperchainhyperchainhyperchain" + strconv.Itoa(i))
-		tempKey := new(EDDSAPrivateKey)
-		tempKey.FromBytes(vkGroup[i], nil)
-		signGroup[i], err = tempKey.Sign(rand.Reader, msgGroup[i], nil)
-		if err != nil {
-			panic("ed25519 init sign err:" + err.Error())
-		}
-	}
-
-	pkGroup := make([][]byte, 64)
-	for i := range vkGroup {
-		pkGroup[i] = make([]byte, 32)
-		copy(pkGroup[i], vkGroup[i][32:])
-	}
-
-	//fail
-	signGroup[23][0] = 23
-	signGroup[47][0] = 00
-
-	b, err := new(EDDSAPublicKey).BatchVerify(pkGroup, signGroup, msgGroup)
-	if err == nil {
-		t.Fail()
-		return
-	}
-	assert.Equal(t, err.Error(), "verify err, have bad signature in batch")
-	assert.Equal(t, b, false)
-}
 
 func TestSingleVerify(t *testing.T) {
 	for i := range testDate {
@@ -159,7 +12,7 @@ func TestSingleVerify(t *testing.T) {
 		reader := bytes.NewBuffer(testDate[i].sk[:])
 		sk, pk := GenerateKey(reader)
 		assert.True(t, bytes.Equal(pk[:], testDate[i].pk[:]))
-		sign, err := sk.Sign(rand.Reader, msg, nil)
+		sign, err := sk.Sign(nil, msg, nil)
 		assert.Nil(t, err)
 		assert.True(t, bytes.Equal(sign, testDate[i].sign[:]))
 		b, err := pk.Verify(nil, sign, msg)
@@ -175,7 +28,8 @@ func TestKey(t *testing.T) {
 		assert.Equal(t, skBytes, sk[:])
 		assert.Equal(t, pk, sk.Public())
 		pkBytes, _ := pk.Bytes()
-		pkNew := new(EDDSAPublicKey).FromBytes(pkBytes)
+		pkNew := new(EDDSAPublicKey)
+		assert.Nil(t, pkNew.FromBytes(pkBytes, 0))
 		pkBytesNew, _ := pkNew.Bytes()
 		assert.Equal(t, pkBytes[:], pkBytesNew[:])
 	}
