@@ -52,16 +52,16 @@ import (
 // operations with the same key more efficient. This package refers to the RFC
 // 8032 private key as the “seed”.
 
-//ExtendedGroupElement
+//ExtendedGroupElement ge25519
 type ExtendedGroupElement = ge25519.Ge25519
 
-//Bignum256
+//Bignum256 variable
 type Bignum256 = modm.Bignum256
 
-//neg
+//nolint neg
 var neg = curve25519.Neg
 
-//lE2Polynomial
+//nolint lE2Polynomial
 var lE2Polynomial = modm.ExpandRaw
 
 //polynomial2LE
@@ -73,10 +73,10 @@ var geDoubleScalarMultVartime = ge25519.DoubleScalarmultVartime
 //geScalarMultBase
 var geScalarMultBase = ge25519.ScalarmultBaseNiels
 
-//scMulAdd
+//nolint scMulAdd
 var scMulAdd = modm.MulAdd
 
-//scAdd
+//nolint scAdd
 var scAdd = modm.Add
 
 //scReduce
@@ -158,11 +158,6 @@ func sign(privateKey *EDDSAPrivateKey, message []byte) []byte {
 	}
 
 	return RS[:]
-}
-
-//ed25519Verify for test function
-func ed25519Verify(digest, pk, sign []byte) bool {
-	return verify(pk, digest, sign)
 }
 
 // Verify reports whether sig is a valid signature of message by publicKey. It

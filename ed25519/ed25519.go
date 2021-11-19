@@ -3,7 +3,6 @@ package ed25519
 import (
 	"crypto"
 	"errors"
-	_ "github.com/meshplus/crypto"
 )
 
 // length
@@ -57,4 +56,3 @@ func (key *EDDSAPublicKey) Bytes() ([]byte, error) {
 	copy(r, key[:])
 	return r, nil
 }
-
