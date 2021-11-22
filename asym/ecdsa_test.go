@@ -21,7 +21,7 @@ func TestGenerateKey(t *testing.T) {
 
 func TestECDSA_Sign(t *testing.T) {
 	type fields struct {
-		Opt AlgorithmOption
+		Opt int
 	}
 	type args struct {
 		k      string
@@ -70,7 +70,8 @@ func TestECDSA_Sign(t *testing.T) {
 			keyBytes, _ := hex.DecodeString(tt.args.k)
 			rand, _ := hex.DecodeString(tt.args.reader)
 			hash, _ := hex.DecodeString(tt.args.digest)
-			skey := new(ECDSAPrivateKey).FromBytes(keyBytes, AlgoP256K1)
+			skey := new(ECDSAPrivateKey)
+			assert.Nil(t, skey.FromBytes(keyBytes, AlgoP256K1))
 			key := new(ecdsa.PrivateKey)
 			key.D = new(big.Int).Set(skey.D)
 			key.PublicKey.Curve = skey.Curve
@@ -85,7 +86,7 @@ func TestECDSA_Sign(t *testing.T) {
 
 func TestECDSA_Verify(t *testing.T) {
 	type fields struct {
-		Opt AlgorithmOption
+		Opt int
 	}
 	type args struct {
 		k         string
@@ -141,7 +142,8 @@ func TestECDSA_Verify(t *testing.T) {
 			key[0] = 0x04
 			keyBytes, _ := hex.DecodeString(tt.args.k)
 			key = append(key, keyBytes...)
-			k := new(ECDSAPublicKey).FromBytes(key, sv.Opt)
+			k := new(ECDSAPublicKey)
+			assert.Nil(t, k.FromBytes(key, sv.Opt))
 
 			sig, _ := hex.DecodeString(tt.args.signature)
 			digest, _ := hex.DecodeString(tt.args.digest)

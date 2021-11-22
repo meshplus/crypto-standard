@@ -16,32 +16,77 @@ type Hasher struct {
 
 //NewHasher instruct a Hasher, the incoming parameter is the algorithm type.
 func NewHasher(hashType HashType) *Hasher {
-	switch hashType {
+	ht, size := hashType&0xf0, hashType&0x0f
+	switch ht {
 	case SHA1:
 		return &Hasher{inner: sha1.New()}
-	case SHA2_256:
-		return &Hasher{inner: sha256.New()}
-	case SHA2_512:
-		return &Hasher{inner: sha512.New()}
-	case SHA3_224:
-		return &Hasher{inner: sha3Hash.New224()}
-	case SHA3_256:
-		return &Hasher{inner: sha3Hash.New256()}
-	case SHA3_384:
-		return &Hasher{inner: sha3Hash.New384()}
+	case SHA2:
+		switch size {
+		case Size224:
+			return &Hasher{inner: sha256.New224()}
+		case Size256:
+			return &Hasher{inner: sha256.New()}
+		case Size384:
+			return &Hasher{inner: sha512.New384()}
+		case Size512:
+			return &Hasher{inner: sha512.New()}
+		default:
+			return nil
+		}
 	case SHA3:
-		return &Hasher{inner: sha3Hash.New512()}
-	case KECCAK_224:
-		return &Hasher{inner: sha3Hash.NewKeccak224()}
-	case KECCAK_384:
-		return &Hasher{inner: sha3Hash.NewKeccak384()}
-	case KECCAK_512:
-		return &Hasher{inner: sha3Hash.NewKeccak512()}
-	case KECCAK_256:
-		return &Hasher{inner: sha3Hash.NewKeccak256()}
+		switch size {
+		case Size224:
+			return &Hasher{inner: sha3Hash.New224()}
+		case Size256:
+			return &Hasher{inner: sha3Hash.New256()}
+		case Size384:
+			return &Hasher{inner: sha3Hash.New384()}
+		case Size512:
+			return &Hasher{inner: sha3Hash.New512()}
+		default:
+			return nil
+		}
+	case KECCAK:
+		switch size {
+		case Size224:
+			return &Hasher{inner: sha3Hash.NewKeccak224()}
+		case Size256:
+			return &Hasher{inner: sha3Hash.NewKeccak256()}
+		case Size384:
+			return &Hasher{inner: sha3Hash.NewKeccak384()}
+		case Size512:
+			return &Hasher{inner: sha3Hash.NewKeccak512()}
+		default:
+			return nil
+		}
 	default:
 		return nil
 	}
+}
+
+//Write write data
+func (h *Hasher) Write(p []byte) (n int, err error) {
+	return h.inner.Write(p)
+}
+
+//Sum get sum
+func (h *Hasher) Sum(b []byte) []byte {
+	return h.inner.Sum(b)
+}
+
+//Reset  reset state
+func (h *Hasher) Reset() {
+	h.inner.Reset()
+}
+
+//Size hash size
+func (h *Hasher) Size() int {
+	return h.inner.Size()
+}
+
+//BlockSize hash block size
+func (h *Hasher) BlockSize() int {
+	return h.inner.BlockSize()
 }
 
 //Hash compute hash

@@ -102,6 +102,9 @@ func TripleDesDec(key, src []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(src) < block.BlockSize() {
+		return nil, errors.New("cipher text is too short")
+	}
 	blockMode := cipher.NewCBCDecrypter(block, src[:block.BlockSize()])
 	//log.Criticalf("dec block size:%d , src len %d, %d",blockMode.BlockSize(),len(src),len(src)%block.BlockSize())
 	origData := make([]byte, len(src)-block.BlockSize())

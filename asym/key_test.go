@@ -22,7 +22,7 @@ func TestSignK1(t *testing.T) {
 	assert.Nil(t, err)
 	bytes, _ := priv.Bytes()
 	assert.NotNil(t, bytes)
-	sign, err := priv.Sign(rand.Reader, h, nil) //r,s经过编码，之后是72bytes
+	sign, err := priv.Sign(nil, h, rand.Reader) //r,s经过编码，之后是72bytes
 	assert.Nil(t, err)
 	assert.NotEqual(t, nil, sign)
 	pub := priv.Public().(*ECDSAPublicKey)
@@ -39,7 +39,7 @@ func TestSignR1(t *testing.T) {
 	assert.Nil(t, err)
 	bytes, _ := priv.Bytes()
 	assert.NotNil(t, bytes)
-	sign, err := priv.Sign(rand.Reader, h, nil)
+	sign, err := priv.Sign(nil, h, rand.Reader)
 	assert.Nil(t, err)
 	assert.NotNil(t, sign)
 	pub := priv.Public().(*ECDSAPublicKey)
@@ -58,7 +58,9 @@ func TestSign(t *testing.T) {
 
 	//calculate publicKey and compare
 	privateBytes, _ := hex.DecodeString(privateFromJSON)
-	privKey := new(ECDSAPrivateKey).FromBytes(privateBytes, AlgoP256K1).CalculatePublicKey()
+	privKey := new(ECDSAPrivateKey)
+	assert.Nil(t, privKey.FromBytes(privateBytes, AlgoP256K1))
+	privKey.CalculatePublicKey()
 	pubKey := privKey.Public().(*ECDSAPublicKey)
 	pubKeyBytes, _ := pubKey.Bytes()
 	if publicFromSDK != hex.EncodeToString(pubKeyBytes) {
@@ -97,7 +99,9 @@ func TestECDSA_K1_SDKCert(t *testing.T) {
 
 	h, _ := hash.NewHasher(hash.SHA2_256).Hash(msgByte)
 
-	b, err := new(ECDSAPublicKey).FromBytes(pubByte, AlgoP256K1).Verify(nil, signByte, h)
+	k := new(ECDSAPublicKey)
+	assert.Nil(t, k.FromBytes(pubByte, AlgoP256K1))
+	b, err := k.Verify(nil, signByte, h)
 	assert.Nil(t, err)
 	assert.True(t, b)
 }
@@ -107,7 +111,8 @@ func TestECDSA_R1(t *testing.T) {
 	msg := "hello"
 	keyBytes, _ := hex.DecodeString(key)
 
-	sk := new(ECDSAPrivateKey).FromBytes(keyBytes, AlgoP256R1)
+	sk := new(ECDSAPrivateKey)
+	assert.Nil(t, sk.FromBytes(keyBytes, AlgoP256R1))
 	pub, ok := sk.Public().(*ECDSAPublicKey)
 	assert.True(t, ok)
 	pubBytes, _ := pub.Bytes()
@@ -122,19 +127,22 @@ func TestECDSA_R1(t *testing.T) {
 func TestBytesAndFromBytes(t *testing.T) {
 	key := "3e83c9cd9a39bf96d1f77a978e1fb32be0ad1732eee157011e162e9749b2e90a"
 	keyBytes, _ := hex.DecodeString(key)
-	priv := new(ECDSAPrivateKey).FromBytes(keyBytes, AlgoP256R1)
+	priv := new(ECDSAPrivateKey)
+	assert.Nil(t, priv.FromBytes(keyBytes, AlgoP256R1))
 	pub, ok := priv.Public().(*ECDSAPublicKey)
 	assert.True(t, ok)
 	tmp, err := priv.Bytes()
 	assert.Nil(t, err)
 	assert.Equal(t, tmp, keyBytes)
-	newPriv := new(ECDSAPrivateKey).FromBytes(tmp, AlgoP256R1)
+	newPriv := new(ECDSAPrivateKey)
+	assert.Nil(t, newPriv.FromBytes(keyBytes, AlgoP256R1))
 	assert.True(t, priv.D.Cmp(newPriv.D) == 0)
 
 	tmp2, err := pub.Bytes()
 	assert.Nil(t, err)
 
-	newPub := new(ECDSAPublicKey).FromBytes(tmp2, AlgoP256R1)
+	newPub := new(ECDSAPublicKey)
+	assert.Nil(t, newPub.FromBytes(tmp2, AlgoP256R1))
 	assert.True(t, pub.X.Cmp(newPub.X) == 0)
 	assert.True(t, pub.Y.Cmp(newPub.Y) == 0)
 }
@@ -143,19 +151,22 @@ func TestBytesAndFromBytes2(t *testing.T) {
 	keyBytes := make([]byte, 32)
 	_, _ = rand.Read(keyBytes)
 	keyBytes[0] = 0
-	priv := new(ECDSAPrivateKey).FromBytes(keyBytes, AlgoP256R1)
+	priv := new(ECDSAPrivateKey)
+	assert.Nil(t, priv.FromBytes(keyBytes, AlgoP256R1))
 	pub, ok := priv.Public().(*ECDSAPublicKey)
 	assert.True(t, ok)
 	tmp, err := priv.Bytes()
 	assert.Nil(t, err)
 	assert.Equal(t, tmp, keyBytes)
-	newPriv := new(ECDSAPrivateKey).FromBytes(tmp, AlgoP256R1)
+	newPriv := new(ECDSAPrivateKey)
+	assert.Nil(t, newPriv.FromBytes(keyBytes, AlgoP256R1))
 	assert.True(t, priv.D.Cmp(newPriv.D) == 0)
 
 	tmp2, err := pub.Bytes()
 	assert.Nil(t, err)
 
-	newPub := new(ECDSAPublicKey).FromBytes(tmp2, AlgoP256R1)
+	newPub := new(ECDSAPublicKey)
+	assert.Nil(t, newPub.FromBytes(tmp2, AlgoP256R1))
 	assert.True(t, pub.X.Cmp(newPub.X) == 0)
 	assert.True(t, pub.Y.Cmp(newPub.Y) == 0)
 }
@@ -169,7 +180,7 @@ func BenchmarkSignK1(t *testing.B) {
 		assert.Nil(t, err)
 		bytes, _ := priv.Bytes()
 		assert.NotNil(t, bytes)
-		sign, err := priv.Sign(rand.Reader, h, nil)
+		sign, err := priv.Sign(nil, h, rand.Reader)
 		t.StopTimer()
 		assert.Nil(t, err)
 		assert.NotEqual(t, nil, sign)
@@ -189,7 +200,7 @@ func BenchmarkVerifyK1(t *testing.B) {
 		assert.Nil(t, err)
 		bytes, _ := priv.Bytes()
 		assert.NotNil(t, bytes)
-		sign, err := priv.Sign(rand.Reader, h, nil)
+		sign, err := priv.Sign(nil, h, rand.Reader)
 		assert.Nil(t, err)
 		assert.NotEqual(t, nil, sign)
 		pub, ok := priv.Public().(*ECDSAPublicKey)
@@ -211,7 +222,7 @@ func BenchmarkSignR1(t *testing.B) {
 		t.StartTimer()
 		h, err := hash.NewHasher(hash.KECCAK_256).Hash(msg)
 		assert.Nil(t, err)
-		sign, err := priv.Sign(rand.Reader, h, nil)
+		sign, err := priv.Sign(nil, h, rand.Reader)
 		t.StopTimer()
 		assert.Nil(t, err)
 		assert.NotNil(t, sign)
@@ -229,7 +240,7 @@ func BenchmarkVerifyR1(t *testing.B) {
 	for i := 0; i < t.N; i++ {
 		h, err := hash.NewHasher(hash.KECCAK_256).Hash(msg)
 		assert.Nil(t, err)
-		sign, err := priv.Sign(rand.Reader, h, nil)
+		sign, err := priv.Sign(nil, h, rand.Reader)
 		assert.Nil(t, err)
 		assert.NotNil(t, sign)
 		pub, ok := priv.Public().(*ECDSAPublicKey)
@@ -251,8 +262,6 @@ func TestJudge(t *testing.T) {
 	priv, err = GenerateKey(AlgoP256K1)
 	assert.Nil(t, err)
 	assert.Equal(t, AlgoP256K1, priv.AlgorithmType())
-	assert.True(t, priv.Private())
-	assert.False(t, priv.Symmetric())
 	pub, ok := priv.Public().(*ECDSAPublicKey)
 	assert.True(t, ok)
 	assert.Nil(t, err)
@@ -265,8 +274,8 @@ func TestSetPublicKey(t *testing.T) {
 		assert.Nil(t, err)
 		bs, err := priv.Bytes()
 		assert.Nil(t, err)
-		newPriv := new(ECDSAPrivateKey)
-		privKey := newPriv.FromBytes(bs, AlgoP256K1)
+		privKey := new(ECDSAPrivateKey)
+		assert.Nil(t, privKey.FromBytes(bs, AlgoP256K1))
 		pub, ok := priv.Public().(*ECDSAPublicKey)
 		assert.True(t, ok)
 		privKey = privKey.SetPublicKey(pub)
@@ -277,27 +286,71 @@ func TestSetPublicKey(t *testing.T) {
 }
 
 func TestRecover(t *testing.T) {
-	h, err := hash.NewHasher(hash.KECCAK_256).Hash(msg)
+	/*
+		只有验签r1k账户实际使用recover并配合address验证，其他如msp中证书等都是用asn1模式
+		有可能早期k1证书中的证书签名是revcover的，因此需要兼容
+		txgen中已经修改为k1证书对应k1r账户
+
+		关于地址计算，ECDSA的都是remove04的
+	*/
+	h, _ := hex.DecodeString("c336dd3813da656a8ff31136a163809eaaf762cc5445b8de8299489301486009")
+	priv, err := GenerateKey(AlgoP256K1Recover) //这里传入AlgoP256K1或AlgoP256K1Recover效果是一样的
 	assert.Nil(t, err)
-	priv, err := GenerateKey(AlgoP256K1) //这里传入AlgoP256K1或AlgoP256K1Recover效果是一样的
+	sign, err := priv.Sign(nil, h, rand.Reader)
 	assert.Nil(t, err)
-	sign, err := priv.Sign(rand.Reader, h, nil) //r,s经过编码，之后是72bytes
-	assert.Nil(t, err)
+	assert.Equal(t, 65, len(sign))
 
 	//你可能是从其他途径获得的地址，但是这里用这种方式也可以计算出地址
-	pub, ok := priv.Public().(*ECDSAPublicKey)
-	assert.True(t, ok)
-	pubByte, perr := pub.Bytes()
+	pub, _ := priv.Public().(*ECDSAPublicKey)
+	address, perr := pub.Bytes()
 	assert.Nil(t, perr)
-	temp, perr := hash.NewHasher(hash.KECCAK_256).Hash(pubByte[1:])
-	assert.Nil(t, perr)
-	address := temp[12:]
 
 	//下面是你关心的怎么用通过地址、hash和签名三种数据来完成验签
-	recoverPub := new(ECDSAPublicKey).FromBytes(address, AlgoP256K1Recover)
+	recoverPub := new(ECDSAPublicKey)
+	assert.Nil(t, recoverPub.FromBytes(address, AlgoP256K1Recover))
 	b, rerr := recoverPub.Verify(nil, sign, h)
 	assert.Nil(t, rerr)
 	assert.True(t, b)
+
+	t.Run("non recover", func(t *testing.T) {
+		privNR, _ := GenerateKey(AlgoP256K1)
+		signNR, _ := privNR.Sign(nil, h, rand.Reader)
+		recoverPubNR := new(ECDSAPublicKey)
+		pk, _ := privNR.ECDSAPublicKey.Bytes()
+		assert.Nil(t, recoverPubNR.FromBytes(pk, AlgoP256K1))
+		r, errNR := recoverPubNR.Verify(nil, signNR, h)
+		assert.Nil(t, errNR)
+		assert.True(t, r)
+	})
+
+	t.Run("address with AlgoP256K1", func(t *testing.T) {
+		recoverPub = new(ECDSAPublicKey)
+		assert.Equal(t, 20, len(address))
+		assert.Nil(t, recoverPub.FromBytes(address, AlgoP256K1))
+		assert.Equal(t, true, recoverPub.recover)
+		assert.Nil(t, recoverPub.FromBytes(get65BytesPub(pub.X, pub.Y, 256), AlgoP256K1))
+		_, rerr = recoverPub.Verify(nil, sign, h)
+		assert.Nil(t, rerr) // recoverPub应该是recover的，但是错误的传入了非recover的模式
+	})
+
+	t.Run("asn1 with recover", func(t *testing.T) {
+		priv, err = GenerateKey(AlgoP256K1) //这里传入AlgoP256K1或AlgoP256K1Recover效果是一样的
+		assert.Nil(t, err)
+		sign, err = priv.Sign(nil, h, rand.Reader) //r,s经过编码，之后是72bytes
+		assert.Nil(t, err)
+
+		//你可能是从其他途径获得的地址，但是这里用这种方式也可以计算出地址
+		pub, ok := priv.Public().(*ECDSAPublicKey)
+		assert.True(t, ok)
+		pk, perr := pub.Bytes()
+		assert.Nil(t, perr)
+
+		//下面是你关心的怎么用通过地址、hash和签名三种数据来完成验签
+		recoverPub = new(ECDSAPublicKey)
+		assert.Nil(t, recoverPub.FromBytes(pk, AlgoP256K1Recover)) //non recover
+		_, rerr = recoverPub.Verify(nil, sign, h)
+		assert.Nil(t, rerr)
+	})
 }
 
 func TestRecover2(t *testing.T) {
@@ -307,17 +360,20 @@ func TestRecover2(t *testing.T) {
 	addr, _ := hex.DecodeString(addrFromJSON)
 	//calculate publicKey and compare
 	privateBytes, _ := hex.DecodeString(privateFromJSON)
-	privKey := new(ECDSAPrivateKey).FromBytes(privateBytes, AlgoP256K1).CalculatePublicKey()
+	privKey := new(ECDSAPrivateKey)
+	assert.Nil(t, privKey.FromBytes(privateBytes, AlgoP256K1Recover))
+	privKey.CalculatePublicKey()
 
 	helloDigt, err := hash.NewHasher(hash.KECCAK_256).Hash([]byte("hello\n"))
 	assert.Nil(t, err)
-	s, err := privKey.Sign(rand.Reader, helloDigt, nil)
+	s, err := privKey.Sign(nil, helloDigt, rand.Reader)
 	assert.Nil(t, err)
-	v, err := new(ECDSAPublicKey).FromBytes(addr, AlgoP256K1Recover).Verify(nil, s, helloDigt)
+	v := new(ECDSAPublicKey)
+	assert.Nil(t, v.FromBytes(addr, AlgoP256K1Recover))
+	_, err = v.Verify(nil, s, helloDigt)
 	assert.Nil(t, err)
-	assert.True(t, v)
 
-	_, err = new(ECDSAPublicKey).FromBytes(addr, AlgoP256K1Recover).Bytes()
+	_, err = v.Bytes()
 	assert.NotNil(t, err)
 
 }
@@ -329,45 +385,45 @@ func TestRecover3(t *testing.T) {
 	key, _ := hex.DecodeString(testPrivHex)
 	addr, _ := hex.DecodeString(testAddrHex)
 
-	privateKey := new(ECDSAPrivateKey).FromBytes(key, AlgoP256K1).CalculatePublicKey()
+	privateKey := new(ECDSAPrivateKey)
+	assert.Nil(t, privateKey.FromBytes(key, AlgoP256K1Recover))
 
 	//sign
-	msg, _ := hash.NewHasher(hash.KECCAK_256).Hash([]byte("foo"))
-	sig, err := privateKey.Sign(rand.Reader, msg, nil)
+	h, _ := hash.NewHasher(hash.KECCAK_256).Hash([]byte("foo"))
+	sig, err := privateKey.Sign(nil, h, rand.Reader)
 	if err != nil {
 		t.Errorf("Sign error: %s", err)
 	}
 
 	//verify
-	b, err := new(ECDSAPublicKey).FromBytes(addr, AlgoP256K1Recover).Verify(nil, sig, msg)
+	k := new(ECDSAPublicKey)
+	assert.Nil(t, k.FromBytes(addr, AlgoP256K1Recover))
+	b, verr := k.Verify(nil, sig, h)
 	assert.True(t, b)
-	if err != nil {
-		t.Log(err)
-	}
+	assert.Nil(t, verr)
 }
 
 func TestRecover4(t *testing.T) {
 	for i := 1000; i > 0; i-- {
-		privateKey, err := GenerateKey(AlgoP256K1)
+		privateKey, err := GenerateKey(AlgoP256K1Recover)
 		assert.Nil(t, err)
 		pub, ok := privateKey.Public().(*ECDSAPublicKey)
 		assert.True(t, ok)
 
-		pubBytes, err := pub.Bytes()
+		addr, err := pub.Bytes()
 		assert.Nil(t, err)
-		temp, err := hash.NewHasher(hash.KECCAK_256).Hash(pubBytes[1:])
-		assert.Nil(t, err)
-		addr := temp[12:]
 
 		//sign
 		msg, _ := hash.NewHasher(hash.KECCAK_256).Hash([]byte("foo"))
-		sig, err := privateKey.Sign(rand.Reader, msg, nil)
+		sig, err := privateKey.Sign(nil, msg, rand.Reader)
 		if err != nil {
 			t.Errorf("Sign error: %s", err)
 		}
 
 		//verify
-		b, err := new(ECDSAPublicKey).FromBytes(addr, AlgoP256K1Recover).Verify(nil, sig, msg)
+		tmpKey := new(ECDSAPublicKey)
+		assert.Nil(t, tmpKey.FromBytes(addr, AlgoP256K1Recover))
+		b, _ := tmpKey.Verify(nil, sig, msg)
 		if !b {
 			privBytes, _ := privateKey.Bytes()
 			t.Log("vk")
