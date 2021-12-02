@@ -167,6 +167,4 @@ target
 
 *.html
 
-go.sum
-
 *.zip
