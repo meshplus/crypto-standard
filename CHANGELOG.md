@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.1.2"></a>
+## [0.1.2](http://github.com/meshplus/crypto/compare/v0.1.1...v0.1.2) (2021-12-02)
+
+
+### Bug Fixes
+
+* **internal:** distinguish repeated symbols for bxh ([9c67500](http://github.com/meshplus/crypto/commits/9c67500))
+
+
+### Features
+
+* **all:** update code version ([cf896eb](http://github.com/meshplus/crypto/commits/cf896eb))
+* **fake_hash.go:** add fake hash ([e6fe9b0](http://github.com/meshplus/crypto/commits/e6fe9b0))
+* **README.md:** update LICENSE ([197f2d0](http://github.com/meshplus/crypto/commits/197f2d0))
+
+
+
 <a name="0.1.1"></a>
 ## [0.1.1](http://github.com/meshplus/crypto/compare/v0.1.0...v0.1.1) (2021-07-21)
 
