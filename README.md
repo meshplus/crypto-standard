@@ -70,17 +70,17 @@ Computational hash
 
 ### symmetric encryption
 Encrypt
-```func (ea *AES) Encrypt(key AESKey, originMsg []byte) (encryptedMsg []byte, err error)```
+```func (ea *AES) Encrypt(key, originMsg []byte, reader io.Reader) (encryptedMsg []byte, err error)```
 
 Decrypt
-```func (ea *AES) Decrypt(key AESKey, encryptedMsg []byte) (originMsg []byte, err error)```
+```func (ea *AES) Decrypt(key, encryptedMsg []byte) (originMsg []byte, err error)```
 
 ### signature
 Generate key pair
-```func GenerateKey(opt AlgorithmOption) (ECDSAPrivateKey, error) ```
+```func GenerateKey(opt int) (*ECDSAPrivateKey, error) ```
 
 Generate signature
-```func (key *ECDSAPrivateKey) Sign(_ []byte, digest []byte) ([]byte, error) ```
+```func (key *ECDSAPrivateKey) Sign(k, digest []byte, reader io.Reader) (signature []byte, err error) ```
 
 Verification signature
 ```func (key *ECDSAPublicKey) Verify(_ []byte, signature, digest []byte) (valid bool, err error) ```
@@ -113,4 +113,4 @@ Small note: If editing the Readme, please conform to the [standard-readme](https
 
 ## License
 
-LGPL © Ultramesh
+crypto-standard is currently under Apache 2.0 license. See the LICENSE file for details.
